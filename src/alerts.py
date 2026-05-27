@@ -17,6 +17,16 @@ from loguru import logger
 from src.models import AlertEvent
 
 # ---------------------------------------------------------------------------
+# Utilities
+# ---------------------------------------------------------------------------
+
+
+def _mask_url(url: str) -> str:
+    """Mask sensitive URL for safe logging (show first 30 chars + ***)."""
+    return url[:30] + "***" if len(url) > 30 else url
+
+
+# ---------------------------------------------------------------------------
 # Payload builders
 # ---------------------------------------------------------------------------
 
@@ -127,7 +137,7 @@ def send_alert(
     if dry_run:
         logger.info(
             "[DRY RUN] Would POST alert to {url}\nPayload:\n{payload}",
-            url=webhook_url,
+            url=_mask_url(webhook_url),
             payload=json.dumps(payload, indent=2, ensure_ascii=False),
         )
         return True
@@ -163,7 +173,7 @@ def send_alert(
         logger.error(
             "Timeout sending alert for {sku} to {url}",
             sku=event.product_sku,
-            url=webhook_url,
+            url=_mask_url(webhook_url),
         )
         return False
     except requests.exceptions.RequestException as exc:
