@@ -1,0 +1,94 @@
+# General settings
+general:
+  user_agents_rotation: true
+  request_timeout_seconds: 30
+  max_retries: 3
+  retry_backoff_seconds: 5
+  parallel_requests: false  # Sequential by default (safer, less detectable)
+
+# Per-store settings
+stores:
+  bestbuy:
+    enabled: true
+    rate_limit_seconds: 3
+    use_api: false  # BestBuy has API but requires key; set BESTBUY_API_KEY in .env
+
+  amazon:
+    enabled: true
+    rate_limit_seconds: 5
+    use_scraperapi: false  # Toggle to use ScraperAPI if SCRAPERAPI_KEY is set in .env
+
+  newegg:
+    enabled: true
+    rate_limit_seconds: 3
+
+  asus_shop:
+    enabled: true
+    rate_limit_seconds: 3
+
+  ebay:
+    enabled: true
+    rate_limit_seconds: 3
+    use_api: false  # eBay Browse API recommended if EBAY_API_KEY is set in .env
+
+# Monitored products
+products:
+  - sku: "UX3405CA-PS99T"
+    name: "ASUS Zenbook 14 OLED PS99T (Ultra 9 285H, 32GB, 1TB, 3K 120Hz)"
+    target_price: 1099.00
+    must_have_terms:
+      - "120Hz"
+      - "32GB"
+      - "285H"
+    blocklist_terms:
+      - "FHD+"
+      - "60Hz"
+      - "WUXGA"
+      - "Refurbished"
+      - "Renewed"
+    stores:
+      bestbuy: "https://www.bestbuy.com/site/searchpage.jsp?st=UX3405CA-PS99T"
+      amazon: "https://www.amazon.com/s?k=UX3405CA-PS99T"
+      newegg: "https://www.newegg.com/p/pl?d=UX3405CA-PS99T"
+      asus_shop: "https://shop.asus.com/us/search?q=UX3405CA-PS99T"
+      ebay: "https://www.ebay.com/sch/i.html?_nkw=UX3405CA-PS99T&_sop=15"
+
+  - sku: "UX3405CA-ES99T"
+    name: "ASUS Zenbook 14 OLED ES99T (Ultra 9 285H, 32GB, 1TB, 3K 120Hz, Win Home)"
+    target_price: 1199.00
+    must_have_terms:
+      - "120Hz"
+      - "32GB"
+      - "285H"
+    blocklist_terms:
+      - "FHD+"
+      - "60Hz"
+      - "WUXGA"
+    stores:
+      bestbuy: "https://www.bestbuy.com/site/searchpage.jsp?st=UX3405CA-ES99T"
+      amazon: "https://www.amazon.com/s?k=UX3405CA-ES99T"
+      asus_shop: "https://shop.asus.com/us/90nb14w4-m022f0-asus-zenbook-14-ux3405.html"
+
+  - sku: "UX3405CA-PZ194W"
+    name: "ASUS Zenbook 14 OLED PZ194W (Ultra 7 255H, 16GB, 1TB, 3K 120Hz)"
+    target_price: 899.00
+    must_have_terms:
+      - "120Hz"
+      - "255H"
+    blocklist_terms:
+      - "FHD+"
+      - "60Hz"
+      - "WUXGA"
+    stores:
+      amazon: "https://www.amazon.com/s?k=UX3405CA-PZ194W"
+      newegg: "https://www.newegg.com/p/pl?d=UX3405CA-PZ194W"
+      ebay: "https://www.ebay.com/sch/i.html?_nkw=UX3405CA-PZ194W"
+
+# Alert configuration
+alerts:
+  webhook_url: "${N8N_WEBHOOK_URL}"  # Read from .env; never hardcode
+  triggers:
+    price_drop_percent: 5            # Alert if price drops 5%+ since last check
+    below_target: true               # Alert whenever price is at or below target_price
+    back_in_stock: true              # Alert when item transitions from out-of-stock to in-stock
+  cooldown_minutes: 360              # Minimum minutes between identical alerts (6 hours)
