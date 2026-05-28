@@ -122,6 +122,7 @@ class TestBelowTargetTrigger:
             result = check_and_alert(check, product, test_config)
 
         assert result is True
+        mock_send.assert_called_once()
         reasons = [call[0][0].reason for call in mock_send.call_args_list]
         assert "below_target" in reasons
 
@@ -190,6 +191,28 @@ class TestPriceDropTrigger:
         # Verify previous_price is set correctly
         pd_call = next(c for c in mock_send.call_args_list if c[0][0].reason == "price_drop")
         assert pd_call[0][0].previous_price == 1299.00
+
+    def test_price_drop_at_exact_threshold_sends_alert(
+        self, test_config, product: Product
+    ) -> None:
+        """$1000 → $950 = exactly 5% drop → alert fires (>= is inclusive)."""
+        last = _make_check(price=1000.00, in_stock=True)
+        current = _make_check(price=950.00, in_stock=True)
+
+        with (
+            patch("src.orchestrator.storage.get_alerts_sent", return_value=[]),
+            patch("src.orchestrator.storage.get_last_check", return_value=last),
+            patch("src.orchestrator.storage.append_alert"),
+            patch("src.orchestrator.alerts.send_alert", return_value=True) as mock_send,
+        ):
+            result = check_and_alert(current, product, test_config)
+
+        assert result is True
+        reasons = [call[0][0].reason for call in mock_send.call_args_list]
+        assert "price_drop" in reasons
+        # Verify previous_price is set correctly
+        pd_call = next(c for c in mock_send.call_args_list if c[0][0].reason == "price_drop")
+        assert pd_call[0][0].previous_price == 1000.00
 
     def test_price_drop_below_threshold_no_alert(
         self, test_config, product: Product
@@ -469,6 +492,7 @@ class TestRunAllChecks:
                 "src.orchestrator.get_scraper"
             ) as mock_get_scraper,
             patch("src.orchestrator.storage.append_check"),
+            patch("src.orchestrator.storage.get_alerts_sent", return_value=[]),
             patch("src.orchestrator.storage.update_last_run"),
             patch("src.orchestrator.storage.acquire_lock", return_value=True),
             patch("src.orchestrator.storage.release_lock"),
