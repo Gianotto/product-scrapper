@@ -42,9 +42,7 @@ class BaseScraper(ABC):
         """
         ...
 
-    def filter_results(
-        self, results: list[dict], product: Product
-    ) -> list[dict]:
+    def filter_results(self, results: list[dict], product: Product) -> list[dict]:
         """Apply must_have_terms and blocklist_terms filters to raw result dicts.
 
         Matching is case-insensitive against the ``title`` key of each dict.
@@ -70,9 +68,7 @@ class BaseScraper(ABC):
             title_lower = (item.get("title") or "").lower()
 
             # Must-have check
-            if not all(
-                term.lower() in title_lower for term in product.must_have_terms
-            ):
+            if not all(term.lower() in title_lower for term in product.must_have_terms):
                 continue
 
             # Blocklist check
@@ -102,11 +98,11 @@ def pick_best_result(checks: list[PriceCheck]) -> PriceCheck | None:
 
     in_stock = [c for c in checks if c.in_stock and c.price is not None]
     if in_stock:
-        return min(in_stock, key=lambda c: c.price)  # type: ignore[return-value]
+        return min(in_stock, key=lambda c: c.price)  # type: ignore[arg-type,return-value]
 
     with_price = [c for c in checks if c.price is not None]
     if with_price:
-        return min(with_price, key=lambda c: c.price)  # type: ignore[return-value]
+        return min(with_price, key=lambda c: c.price)  # type: ignore[arg-type,return-value]
 
     # All checks have no price — return first
     return checks[0]

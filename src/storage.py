@@ -258,7 +258,7 @@ def get_last_check(sku: str, store: str) -> PriceCheck | None:
 # ---------------------------------------------------------------------------
 
 
-def get_alerts_sent(sku: str, hours: int = 6) -> list[AlertEvent]:
+def get_alerts_sent(sku: str, hours: int | float = 6) -> list[AlertEvent]:
     """
     Return AlertEvents for *sku* sent within the last *hours* hours.
     """

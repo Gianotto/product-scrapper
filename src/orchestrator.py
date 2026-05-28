@@ -8,7 +8,7 @@ evaluates alert triggers, and persists results.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Any
 
@@ -19,7 +19,6 @@ from src.config import AppConfig
 from src.models import AlertEvent, PriceCheck, Product
 from src.scrapers import get_scraper
 from src.scrapers.base import pick_best_result
-
 
 # ---------------------------------------------------------------------------
 # Stats
@@ -70,14 +69,13 @@ def check_and_alert(
     try:
         recent_alerts = storage.get_alerts_sent(product.sku, hours=cooldown_hours)
     except Exception as exc:
-        logger.warning("Could not read recent alerts for {sku}: {exc}", sku=product.sku, exc=exc)
+        logger.warning(
+            "Could not read recent alerts for {sku}: {exc}", sku=product.sku, exc=exc
+        )
         recent_alerts = []
 
     def _was_recently_alerted(reason: str) -> bool:
-        return any(
-            a.reason == reason and a.store == check.store
-            for a in recent_alerts
-        )
+        return any(a.reason == reason and a.store == check.store for a in recent_alerts)
 
     def _send(reason: str, previous_price: float | None = None) -> None:
         nonlocal sent_any

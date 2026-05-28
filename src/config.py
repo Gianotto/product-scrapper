@@ -18,7 +18,6 @@ from dotenv import load_dotenv
 
 from src.models import Product
 
-
 # ---------------------------------------------------------------------------
 # Nested config dataclasses
 # ---------------------------------------------------------------------------
@@ -73,6 +72,7 @@ _PLACEHOLDER_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 def _interpolate(value: Any) -> Any:
     """Recursively replace ${VAR_NAME} in string values with env-var contents."""
     if isinstance(value, str):
+
         def _replace(match: re.Match) -> str:
             var = match.group(1)
             env_value = os.environ.get(var)
@@ -203,6 +203,7 @@ def load_config(
     # Warn if webhook URL was not resolved (still contains placeholder)
     if "${" in alerts.webhook_url:
         import warnings
+
         warnings.warn(
             "alerts.webhook_url still contains an unresolved placeholder. "
             "Set N8N_WEBHOOK_URL in your .env or environment.",

@@ -117,7 +117,9 @@ def main(argv: list[str] | None = None) -> int:
 
         config = load_config(args.config)
     except Exception as exc:
-        logger.error("Failed to load config from {path}: {exc}", path=args.config, exc=exc)
+        logger.error(
+            "Failed to load config from {path}: {exc}", path=args.config, exc=exc
+        )
         return 2
 
     logger.info(

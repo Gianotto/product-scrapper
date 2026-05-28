@@ -7,7 +7,6 @@ Uses a CSS-selector fallback chain to handle minor site layout changes.
 
 from __future__ import annotations
 
-import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -80,6 +79,7 @@ class BestBuyScraper(BaseScraper):
         if getattr(self.general_config, "user_agents_rotation", True):
             try:
                 from fake_useragent import UserAgent
+
                 return UserAgent().chrome
             except Exception:
                 pass
@@ -98,20 +98,6 @@ class BestBuyScraper(BaseScraper):
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1",
         }
-
-    @retry(
-        stop=stop_after_attempt(3),  # overridden dynamically in search()
-        wait=wait_fixed(5),
-        reraise=True,
-    )
-    def _fetch(self, url: str, timeout: int) -> requests.Response:
-        """Perform HTTP GET with retries.  Raises on non-2xx (except 429/503)."""
-        return requests.get(
-            url,
-            headers=self._build_headers(),
-            timeout=timeout,
-            allow_redirects=True,
-        )
 
     def _fetch_with_config(self, url: str) -> requests.Response:
         """Fetch *url* applying retry settings from general_config."""
@@ -160,8 +146,6 @@ class BestBuyScraper(BaseScraper):
         self,
         card: Any,
         base_url: str,
-        product_sku: str,
-        timestamp: str,
     ) -> dict | None:
         """Extract raw data from a single product card.
 
@@ -227,7 +211,7 @@ class BestBuyScraper(BaseScraper):
         soup = BeautifulSoup(html, "lxml")
 
         # Find product cards using fallback selector chain
-        cards = []
+        cards: list[Any] = []
         for sel in _CARD_SELECTORS:
             cards = soup.select(sel)
             if cards:
@@ -245,7 +229,7 @@ class BestBuyScraper(BaseScraper):
         raw_results: list[dict] = []
         for card in cards:
             try:
-                raw = self._parse_card(card, _BASE_URL, product.sku, timestamp)
+                raw = self._parse_card(card, _BASE_URL)
                 if raw is not None:
                     raw_results.append(raw)
             except Exception as exc:
