@@ -176,10 +176,11 @@ def run_all_checks(
     stats = RunStats(started_at=datetime.now(timezone.utc).isoformat())
     start_ts = time.monotonic()
 
-    if not storage.acquire_lock():
-        logger.error("Could not acquire lock — another instance may be running.")
-        stats.completed_at = datetime.now(timezone.utc).isoformat()
-        return stats
+    if not dry_run:
+        if not storage.acquire_lock():
+            logger.error("Could not acquire lock — another instance may be running.")
+            stats.completed_at = datetime.now(timezone.utc).isoformat()
+            return stats
 
     try:
         if not dry_run:
@@ -313,6 +314,7 @@ def run_all_checks(
                 logger.warning("Failed to write last_run.json: {exc}", exc=exc)
 
     finally:
-        storage.release_lock()
+        if not dry_run:
+            storage.release_lock()
 
     return stats
