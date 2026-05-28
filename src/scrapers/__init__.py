@@ -20,11 +20,18 @@ def get_scraper(store_name: str, config) -> BaseScraper:
     ValueError
         If no scraper is implemented for *store_name*.
     """
+    from src.scrapers.amazon import AmazonScraper
+    from src.scrapers.asus_shop import ASUSShopScraper
     from src.scrapers.bestbuy import BestBuyScraper
+    from src.scrapers.ebay import EbayScraper
+    from src.scrapers.newegg import NeweggScraper
 
-    # Additional scrapers will be registered here in Task 3
     _registry: dict[str, type[BaseScraper]] = {
         "bestbuy": BestBuyScraper,
+        "asus_shop": ASUSShopScraper,
+        "newegg": NeweggScraper,
+        "ebay": EbayScraper,
+        "amazon": AmazonScraper,
     }
 
     if store_name not in _registry:

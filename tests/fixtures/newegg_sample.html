@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Newegg - Search Results for ASUS Zenbook</title>
+</head>
+<body>
+  <div class="list-wrap">
+
+    <!-- Card 1: Matching product — should PASS filters (has 32GB, 285H, 120Hz) -->
+    <div class="item-cell">
+      <div class="item-container">
+        <div class="item-info">
+          <a class="item-title" href="https://www.newegg.com/asus-zenbook-14-oled/p/N82E16834234567">
+            ASUS Zenbook 14 OLED 14" Laptop Intel Core Ultra 9 285H 32GB Memory 1TB SSD 120Hz 3K Display
+          </a>
+        </div>
+        <div class="item-action">
+          <ul class="item-priceinfo">
+            <li class="price-current">
+              <strong>1,299</strong><sup>.00</sup>
+            </li>
+          </ul>
+          <div class="item-button-area">
+            <button class="btn-primary btn-neo" type="button">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Should be BLOCKED by "60Hz" and missing 285H -->
+    <div class="item-cell">
+      <div class="item-container">
+        <div class="item-info">
+          <a class="item-title" href="https://www.newegg.com/asus-zenbook-14/p/N82E16834234111">
+            ASUS Zenbook 14 Laptop Intel Core i5 16GB Memory 512GB SSD FHD+ 60Hz Display
+          </a>
+        </div>
+        <div class="item-action">
+          <ul class="item-priceinfo">
+            <li class="price-current">
+              <strong>699</strong><sup>.00</sup>
+            </li>
+          </ul>
+          <div class="item-button-area">
+            <button class="btn-primary btn-neo" type="button">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Sponsored item that would otherwise match — should be skipped -->
+    <div class="item-cell item-sponsored">
+      <div class="item-container">
+        <div class="item-info">
+          <a class="item-title" href="https://www.newegg.com/asus-zenbook-sponsored/p/SPONSORED123">
+            ASUS Zenbook 14 OLED 285H 32GB 120Hz Sponsored Listing
+          </a>
+        </div>
+        <div class="item-action">
+          <ul class="item-priceinfo">
+            <li class="price-current">
+              <strong>1,199</strong><sup>.00</sup>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: OUT OF STOCK item that passes must_have -->
+    <div class="item-cell">
+      <div class="item-container">
+        <div class="item-info">
+          <a class="item-title" href="https://www.newegg.com/asus-zenbook-14-oled-oos/p/N82E16834234999">
+            ASUS Zenbook 14 OLED 285H 32GB 120Hz 2TB SSD
+          </a>
+        </div>
+        <div class="item-action">
+          <ul class="item-priceinfo">
+            <li class="price-current">
+              <strong>1,499</strong><sup>.00</sup>
+            </li>
+          </ul>
+          <div class="item-deactivate">
+            <span class="item-stock text-danger">OUT OF STOCK</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

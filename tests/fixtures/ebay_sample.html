@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>eBay - Search Results for ASUS Zenbook</title>
+</head>
+<body>
+  <ul class="srp-results">
+
+    <!-- Card 0: Dummy/sponsored header item — should be SKIPPED -->
+    <li class="s-item s-item__pl-on-bottom">
+      <div class="s-item__info">
+        <a class="s-item__link" href="https://www.ebay.com/sch/i.html?_nkw=asus+zenbook">
+          <h3 class="s-item__title">Shop on eBay</h3>
+        </a>
+        <span class="s-item__price">$0.00</span>
+      </div>
+    </li>
+
+    <!-- Card 1: Matching product — BIN listing, new, should PASS filters -->
+    <li class="s-item s-item__pl-on-bottom">
+      <div class="s-item__info">
+        <a class="s-item__link" href="https://www.ebay.com/itm/123456789">
+          <h3 class="s-item__title">ASUS Zenbook 14 OLED Intel Core Ultra 9 285H 32GB RAM 1TB SSD 120Hz 3K Laptop</h3>
+        </a>
+        <span class="s-item__price">$1,249.99</span>
+        <span class="s-item__subtitle">Brand New</span>
+        <span class="s-item__detail s-item__detail--secondary">
+          <span class="SECONDARY_INFO">Buy It Now</span>
+        </span>
+      </div>
+    </li>
+
+    <!-- Card 2: Should be BLOCKED by "60Hz" and missing 285H -->
+    <li class="s-item s-item__pl-on-bottom">
+      <div class="s-item__info">
+        <a class="s-item__link" href="https://www.ebay.com/itm/987654321">
+          <h3 class="s-item__title">ASUS Zenbook 14 FHD+ 60Hz Core i5 16GB 512GB Laptop</h3>
+        </a>
+        <span class="s-item__price">$649.00</span>
+        <span class="s-item__detail s-item__detail--secondary">
+          <span class="SECONDARY_INFO">Buy It Now</span>
+        </span>
+      </div>
+    </li>
+
+    <!-- Card 3: Auction item that passes must_have — should be SKIPPED (auction, not BIN) -->
+    <li class="s-item s-item__pl-on-bottom">
+      <div class="s-item__info">
+        <a class="s-item__link" href="https://www.ebay.com/itm/111222333">
+          <h3 class="s-item__title">ASUS Zenbook 14 OLED 285H 32GB 120Hz Auction Laptop</h3>
+        </a>
+        <span class="s-item__price">$999.00</span>
+        <span class="s-item__detail s-item__detail--secondary">
+          <span class="SECONDARY_INFO">Auction</span>
+        </span>
+      </div>
+    </li>
+
+    <!-- Card 4: Sold listing — should not appear as available -->
+    <li class="s-item s-item__pl-on-bottom">
+      <div class="s-item__info">
+        <a class="s-item__link" href="https://www.ebay.com/itm/444555666">
+          <h3 class="s-item__title">ASUS Zenbook 14 OLED 285H 32GB 120Hz Sold</h3>
+        </a>
+        <span class="s-item__price">$1,100.00</span>
+        <span class="s-item__detail s-item__detail--secondary">
+          <span class="SECONDARY_INFO">Buy It Now</span>
+        </span>
+        <span class="s-item__caption--signal NEGATIVE">Sold</span>
+      </div>
+    </li>
+
+  </ul>
+</body>
+</html>

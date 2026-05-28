@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ASUS Shop - Search Results</title>
+</head>
+<body>
+  <div class="ProductList">
+
+    <!-- Card 1: Matching product — should PASS filters (has 32GB, 285H, 120Hz; no blocklist terms) -->
+    <div class="ProductItem" data-product-id="UX3405CA-PS99T">
+      <div class="ProductItem__title">
+        <a href="/us/laptops/zenbook/zenbook-14-oled-ux3405ca-ps99t/">
+          ASUS Zenbook 14 OLED 14" Laptop - Intel Core Ultra 9 285H - 32GB Memory - 1TB SSD - 3K 120Hz OLED
+        </a>
+      </div>
+      <div class="ProductItem__price">$1,399.00</div>
+      <button class="ProductItem__add-to-cart btn-add-to-cart">Add to Cart</button>
+    </div>
+
+    <!-- Card 2: Should be BLOCKED by "60Hz" and "FHD+" -->
+    <div class="ProductItem" data-product-id="UX3402VA-KB51">
+      <div class="ProductItem__title">
+        <a href="/us/laptops/zenbook/zenbook-14-ux3402va-kb51/">
+          ASUS Zenbook 14 Laptop - Intel Core i5 - 16GB Memory - 512GB SSD - FHD+ 60Hz Display
+        </a>
+      </div>
+      <div class="ProductItem__price">$799.00</div>
+      <button class="ProductItem__add-to-cart btn-add-to-cart">Add to Cart</button>
+    </div>
+
+    <!-- Card 3: Out of Stock item that passes must_have but is OOS -->
+    <div class="ProductItem" data-product-id="UX3405CB-PP99T">
+      <div class="ProductItem__title">
+        <a href="/us/laptops/zenbook/zenbook-14-oled-ux3405cb-pp99t/">
+          ASUS Zenbook 14 OLED 14" Laptop - Intel Core Ultra 9 285H - 32GB Memory - 2TB SSD - 3K 120Hz OLED
+        </a>
+      </div>
+      <div class="ProductItem__price">$1,499.00</div>
+      <span class="ProductItem__stock-status">Out of Stock</span>
+    </div>
+
+  </div>
+</body>
+</html>
