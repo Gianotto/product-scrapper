@@ -1,0 +1,33 @@
+general:
+  user_agents_rotation: false
+  request_timeout_seconds: 10
+  max_retries: 1
+  retry_backoff_seconds: 0
+  parallel_requests: false
+
+stores:
+  bestbuy:
+    enabled: true
+    rate_limit_seconds: 0
+    use_api: false
+  amazon:
+    enabled: true
+    rate_limit_seconds: 0
+    use_scraperapi: false
+
+products:
+  - sku: "TEST-SKU-001"
+    name: "Test Laptop"
+    target_price: 1000.00
+    must_have_terms: ["120Hz"]
+    blocklist_terms: ["60Hz"]
+    stores:
+      bestbuy: "https://www.bestbuy.com/search?q=test"
+
+alerts:
+  webhook_url: "https://example.com/webhook/test"
+  triggers:
+    price_drop_percent: 5
+    below_target: true
+    back_in_stock: true
+  cooldown_minutes: 360
