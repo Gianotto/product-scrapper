@@ -8,11 +8,11 @@ The payload includes a human-readable message field in Brazilian Portuguese.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
 from typing import Any
 
 import requests
 from loguru import logger
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 from src.models import AlertEvent
 
@@ -105,6 +105,31 @@ def _build_payload(event: AlertEvent) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# HTTP helper with retry
+# ---------------------------------------------------------------------------
+
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_fixed(5),
+    retry=retry_if_exception_type(requests.exceptions.RequestException),
+    before_sleep=lambda rs: logger.warning(
+        "Webhook POST failed (attempt {attempt}), retrying in 5 s…",
+        attempt=rs.attempt_number,
+    ),
+    reraise=True,
+)
+def _post_with_retry(url: str, payload: dict) -> requests.Response:
+    """POST *payload* to *url* with up to 3 attempts, 5 s apart."""
+    return requests.post(
+        url,
+        json=payload,
+        timeout=15,
+        headers={"Content-Type": "application/json"},
+    )
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -147,12 +172,7 @@ def send_alert(
         return False
 
     try:
-        response = requests.post(
-            webhook_url,
-            json=payload,
-            timeout=15,
-            headers={"Content-Type": "application/json"},
-        )
+        response = _post_with_retry(webhook_url, payload)
         if response.ok:
             logger.info(
                 "Alert sent for {sku} ({reason}) — HTTP {status}",
@@ -169,16 +189,9 @@ def send_alert(
                 body=response.text[:200],
             )
             return False
-    except requests.exceptions.Timeout:
-        logger.error(
-            "Timeout sending alert for {sku} to {url}",
-            sku=event.product_sku,
-            url=_mask_url(webhook_url),
-        )
-        return False
     except requests.exceptions.RequestException as exc:
         logger.error(
-            "Failed to send alert for {sku}: {exc}",
+            "Failed to send alert for {sku} after retries: {exc}",
             sku=event.product_sku,
             exc=exc,
         )

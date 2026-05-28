@@ -32,6 +32,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from loguru import logger
+
 from src.models import AlertEvent, PriceCheck
 
 # ---------------------------------------------------------------------------
@@ -190,12 +192,26 @@ def load_log() -> dict[str, Any]:
     Load price_log.json and return its parsed content.
 
     Creates and returns a fresh empty log structure if the file does not exist.
+    If the file is corrupt (invalid JSON), it is backed up with a timestamped
+    suffix and a fresh empty log is returned.
     """
     path = _price_log_path()
     if not path.exists():
         return _empty_log()
-    with path.open("r", encoding="utf-8") as fh:
-        return json.load(fh)
+    try:
+        with path.open("r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except json.JSONDecodeError as e:
+        corrupt_path = path.with_suffix(
+            f".corrupt.{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
+        )
+        logger.error(
+            "Corrupt price_log.json: {e}. Backing up to {backup} and starting fresh.",
+            e=e,
+            backup=corrupt_path,
+        )
+        path.rename(corrupt_path)
+        return _empty_log()
 
 
 def save_log(data: dict[str, Any]) -> None:
