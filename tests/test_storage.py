@@ -13,7 +13,6 @@ import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 

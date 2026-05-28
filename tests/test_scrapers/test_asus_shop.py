@@ -10,9 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
-
-from src.models import PriceCheck, Product
+from src.models import Product
 from src.scrapers.asus_shop import ASUSShopScraper, _parse_price
 
 # ---------------------------------------------------------------------------

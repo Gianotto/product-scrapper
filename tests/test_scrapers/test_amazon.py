@@ -9,11 +9,9 @@ time.sleep is patched to avoid 5-second delays in tests.
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
-
-from src.models import PriceCheck, Product
+from src.models import Product
 from src.scrapers.amazon import AmazonScraper, _parse_price, _detect_block
 
 # ---------------------------------------------------------------------------

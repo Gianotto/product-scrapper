@@ -177,7 +177,6 @@ class EbayScraper(BaseScraper):
             return None
 
         # Skip auction items (we want BIN only)
-        card_text_lower = card.get_text().lower()
         secondary_info = card.select_one(".SECONDARY_INFO")
         listing_type = (
             secondary_info.get_text(strip=True).lower() if secondary_info else ""
@@ -201,9 +200,6 @@ class EbayScraper(BaseScraper):
         is_sold = (
             sold_tag is not None and "sold" in sold_tag.get_text(strip=True).lower()
         )
-        in_stock = not is_sold and "sold" not in card_text_lower.replace("sold", "___")
-
-        # Re-check: specifically look for the "Sold" signal
         in_stock = not is_sold
 
         return {

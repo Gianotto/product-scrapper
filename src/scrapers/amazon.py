@@ -201,7 +201,7 @@ class AmazonScraper(BaseScraper):
         url = f"{base_url}/dp/{asin}"
 
         # Stock: if price found → in_stock; if no price → out_of_stock
-        in_stock = price is not None
+        in_stock = price is not None  # no price selector hit → assume out of stock
 
         return {
             "title": title,
