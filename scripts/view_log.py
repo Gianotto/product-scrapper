@@ -14,7 +14,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 
@@ -125,7 +125,7 @@ def _build_check_display_rows(checks: list[dict]) -> list[dict]:
     rows = []
     for c in checks:
         if c.get("error"):
-            price_display = f"N/A"
+            price_display = "N/A"
             note = f"(failed: {c['error'][:30]})"
         else:
             price_display = _fmt_price(c["price"])
