@@ -65,7 +65,7 @@ class TestSearchParsesMatchingProduct:
 
     def test_search_parses_matching_product(self, mocker):
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -81,7 +81,7 @@ class TestSearchParsesMatchingProduct:
     def test_price_parsed_correctly(self, mocker):
         """Newegg split price (<strong>1,299</strong><sup>.00</sup>) parses to 1299.0."""
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -94,7 +94,7 @@ class TestSearchParsesMatchingProduct:
     def test_in_stock_flag_set(self, mocker):
         """Card with Add-to-Cart and no OUT OF STOCK text should have in_stock=True."""
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -110,7 +110,7 @@ class TestBlocklistedProductFiltered:
 
     def test_blocklisted_product_filtered(self, mocker):
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -123,7 +123,7 @@ class TestBlocklistedProductFiltered:
     def test_sponsored_item_skipped(self, mocker):
         """Items with item-sponsored class should be filtered out."""
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -139,7 +139,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_http_503_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response("", 503),
         )
         scraper = _make_scraper()
@@ -149,7 +149,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_http_404_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response("", 404),
         )
         scraper = _make_scraper()
@@ -159,7 +159,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_request_exception_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             side_effect=Exception("Connection refused"),
         )
         scraper = _make_scraper()
@@ -174,7 +174,7 @@ class TestNoResultsReturnsEmpty:
     def test_no_results_returns_empty(self, mocker):
         empty_html = "<html><body><div class='no-results'>No products found.</div></body></html>"
         mocker.patch(
-            "src.scrapers.newegg.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(empty_html),
         )
         scraper = _make_scraper()

@@ -65,7 +65,7 @@ class TestSearchParsesMatchingProduct:
 
     def test_search_parses_matching_product(self, mocker):
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -80,7 +80,7 @@ class TestSearchParsesMatchingProduct:
 
     def test_price_parsed_correctly(self, mocker):
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -93,7 +93,7 @@ class TestSearchParsesMatchingProduct:
     def test_bin_param_appended_to_url(self, mocker):
         """search() should append LH_BIN=1 to the URL if not present."""
         mock_get = mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -115,7 +115,7 @@ class TestAuctionOrDummyItemsSkipped:
 
     def test_dummy_shop_on_ebay_item_skipped(self, mocker):
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -128,7 +128,7 @@ class TestAuctionOrDummyItemsSkipped:
     def test_auction_item_skipped(self, mocker):
         """Listings with 'Auction' as secondary info should be skipped."""
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -145,7 +145,7 @@ class TestBlocklistedProductFiltered:
 
     def test_blocklisted_product_filtered(self, mocker):
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -161,7 +161,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_http_503_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response("", 503),
         )
         scraper = _make_scraper()
@@ -171,7 +171,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_http_404_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response("", 404),
         )
         scraper = _make_scraper()
@@ -181,7 +181,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_request_exception_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             side_effect=Exception("Connection refused"),
         )
         scraper = _make_scraper()
@@ -196,7 +196,7 @@ class TestNoResultsReturnsEmpty:
     def test_no_results_returns_empty(self, mocker):
         empty_html = "<html><body><ul class='srp-results'></ul></body></html>"
         mocker.patch(
-            "src.scrapers.ebay.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(empty_html),
         )
         scraper = _make_scraper()

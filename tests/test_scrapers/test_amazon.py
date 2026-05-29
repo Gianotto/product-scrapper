@@ -65,7 +65,7 @@ class TestSearchParsesMatchingProduct:
     """AmazonScraper.search() returns only cards that pass the product filters."""
 
     def test_search_parses_matching_product(self, mocker):
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(SAMPLE_HTML))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(SAMPLE_HTML))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()
@@ -78,7 +78,7 @@ class TestSearchParsesMatchingProduct:
         assert "120Hz" in results[0].raw_title
 
     def test_price_parsed_correctly(self, mocker):
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(SAMPLE_HTML))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(SAMPLE_HTML))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()
@@ -89,7 +89,7 @@ class TestSearchParsesMatchingProduct:
 
     def test_product_url_uses_asin(self, mocker):
         """Product URL should be the canonical /dp/{asin} URL."""
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(SAMPLE_HTML))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(SAMPLE_HTML))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()
@@ -99,7 +99,7 @@ class TestSearchParsesMatchingProduct:
 
     def test_in_stock_true_when_price_present(self, mocker):
         """Card with a price should have in_stock=True."""
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(SAMPLE_HTML))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(SAMPLE_HTML))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()
@@ -113,7 +113,7 @@ class TestBlocklistedProductFiltered:
     """Blocklisted products must not appear in results."""
 
     def test_blocklisted_product_filtered(self, mocker):
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(SAMPLE_HTML))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(SAMPLE_HTML))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()
@@ -124,7 +124,7 @@ class TestBlocklistedProductFiltered:
 
     def test_out_of_stock_card_has_no_price(self, mocker):
         """Card without price element should have in_stock=False."""
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(SAMPLE_HTML))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(SAMPLE_HTML))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         # Use must_have that matches the no-price card too
@@ -144,7 +144,7 @@ class TestCaptchaDetectedReturnsEmpty:
             "<p>Sorry, we just need to make sure you're not a robot</p>"
             "</body></html>"
         )
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(captcha_html))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(captcha_html))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()
@@ -157,7 +157,7 @@ class TestCaptchaDetectedReturnsEmpty:
             "<p>Type the characters you see in this image</p>"
             "</body></html>"
         )
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(captcha_html))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(captcha_html))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()
@@ -170,7 +170,7 @@ class TestCaptchaDetectedReturnsEmpty:
             "<p>Error: api-services-support</p>"
             "</body></html>"
         )
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(block_html))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(block_html))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()
@@ -183,7 +183,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_http_503_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.amazon.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response("", 503),
         )
         mocker.patch("src.scrapers.amazon.time.sleep")
@@ -194,7 +194,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_http_429_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.amazon.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response("", 429),
         )
         mocker.patch("src.scrapers.amazon.time.sleep")
@@ -205,7 +205,7 @@ class TestHttpErrorReturnsEmpty:
 
     def test_request_exception_returns_empty(self, mocker):
         mocker.patch(
-            "src.scrapers.amazon.requests.get",
+            "src.scrapers.base.requests.Session.get",
             side_effect=Exception("Connection refused"),
         )
         mocker.patch("src.scrapers.amazon.time.sleep")
@@ -224,7 +224,7 @@ class TestNoResultsReturnsEmpty:
             "<div class='s-main-slot'>No results for your search.</div>"
             "</body></html>"
         )
-        mocker.patch("src.scrapers.amazon.requests.get", return_value=_make_response(empty_html))
+        mocker.patch("src.scrapers.base.requests.Session.get", return_value=_make_response(empty_html))
         mocker.patch("src.scrapers.amazon.time.sleep")
         scraper = _make_scraper()
         product = _make_product()

@@ -66,7 +66,7 @@ class TestSearchReturnsMatchingResults:
 
     def test_search_returns_matching_results(self, mocker):
         mocker.patch(
-            "src.scrapers.bestbuy.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -81,7 +81,7 @@ class TestSearchReturnsMatchingResults:
 
     def test_price_parsed_correctly(self, mocker):
         mocker.patch(
-            "src.scrapers.bestbuy.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -94,7 +94,7 @@ class TestSearchReturnsMatchingResults:
     def test_blocked_response_returns_empty(self, mocker):
         """HTTP 503 should return empty list without raising."""
         mocker.patch(
-            "src.scrapers.bestbuy.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response("", 503),
         )
         scraper = _make_scraper()
@@ -106,7 +106,7 @@ class TestSearchReturnsMatchingResults:
     def test_rate_limited_response_returns_empty(self, mocker):
         """HTTP 429 should return empty list without raising."""
         mocker.patch(
-            "src.scrapers.bestbuy.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response("", 429),
         )
         scraper = _make_scraper()
@@ -118,7 +118,7 @@ class TestSearchReturnsMatchingResults:
     def test_in_stock_flag_set(self, mocker):
         """Card with add-to-cart button should have in_stock=True."""
         mocker.patch(
-            "src.scrapers.bestbuy.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(SAMPLE_HTML),
         )
         scraper = _make_scraper()
@@ -262,7 +262,7 @@ class TestParseException:
         </html>
         """
         mocker.patch(
-            "src.scrapers.bestbuy.requests.get",
+            "src.scrapers.base.requests.Session.get",
             return_value=_make_response(html),
         )
         scraper = _make_scraper()
