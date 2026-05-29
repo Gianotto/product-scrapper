@@ -29,7 +29,7 @@ stores:
   ebay:
     enabled: true
     rate_limit_seconds: 3
-    use_api: false  # Set true + add EBAY_API_KEY to .env to use Finding API (more reliable than scraping)
+    use_api: false  # Set true + add EBAY_CLIENT_ID/EBAY_CLIENT_SECRET to .env to use Browse API
 
 # Monitored products
 products:

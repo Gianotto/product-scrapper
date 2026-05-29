@@ -1,18 +1,19 @@
 """
 eBay scraper.
 
-Uses the eBay Finding API when EBAY_API_KEY is set in the environment and
-``use_api: true`` is configured for the ebay store — this is more reliable
-and avoids bot-detection issues.
+Uses the eBay Browse API (REST + OAuth) when EBAY_CLIENT_ID and
+EBAY_CLIENT_SECRET are set and ``use_api: true`` is configured — this avoids
+bot-detection entirely and gives clean JSON results.
 
-Falls back to HTML scraping of the search-results page (Buy It Now only)
-when the API is not configured.
+Falls back to HTML scraping (Buy It Now only) when credentials are absent.
 """
 
 from __future__ import annotations
 
+import base64
 import os
 import re
+import time
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
@@ -46,8 +47,9 @@ _PRICE_SELECTORS = [
 _BASE_URL = "https://www.ebay.com"
 _DUMMY_TITLE = "shop on ebay"
 
-# eBay Finding API endpoint (free, requires App ID from developer.ebay.com)
-_FINDING_API_URL = "https://svcs.ebay.com/services/search/FindingService/v1"
+_BROWSE_API_URL = "https://api.ebay.com/buy/browse/v1/item_summary/search"
+_TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
+_TOKEN_SCOPE = "https://api.ebay.com/oauth/api_scope"
 
 
 # ---------------------------------------------------------------------------
@@ -82,15 +84,54 @@ def _ensure_bin(url: str) -> str:
 
 
 class EbayScraper(BaseScraper):
-    """eBay scraper — uses Finding API when configured, HTML scraping otherwise."""
+    """eBay scraper — uses Browse API when configured, HTML scraping otherwise."""
 
     name = "ebay"
     _referer = "https://www.ebay.com/"
     _debug_html_name = "debug_ebay.html"
 
+    def __init__(self, config, general_config) -> None:
+        super().__init__(config, general_config)
+        self._oauth_token: str | None = None
+        self._token_expires_at: float = 0.0
+
     # ------------------------------------------------------------------
-    # Finding API path
+    # Browse API path
     # ------------------------------------------------------------------
+
+    def _get_oauth_token(self) -> str | None:
+        """Return a valid OAuth token, refreshing if expired."""
+        client_id = os.environ.get("EBAY_CLIENT_ID", "")
+        client_secret = os.environ.get("EBAY_CLIENT_SECRET", "")
+        if not client_id or not client_secret:
+            return None
+
+        # Return cached token if valid with a 60-second buffer
+        if self._oauth_token and time.time() < self._token_expires_at - 60:
+            return self._oauth_token
+
+        try:
+            credentials = base64.b64encode(
+                f"{client_id}:{client_secret}".encode()
+            ).decode()
+            resp = self._session.post(
+                _TOKEN_URL,
+                headers={
+                    "Authorization": f"Basic {credentials}",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                data=f"grant_type=client_credentials&scope={_TOKEN_SCOPE}",
+                timeout=30,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            self._oauth_token = data["access_token"]
+            self._token_expires_at = time.time() + int(data.get("expires_in", 7200))
+            logger.debug("eBay OAuth token obtained, expires in {s}s", s=data.get("expires_in"))
+            return self._oauth_token
+        except Exception as exc:
+            logger.warning("eBay OAuth token request failed: {exc}", exc=exc)
+            return None
 
     def _extract_keywords(self, search_url: str, product: Product) -> str:
         """Extract keywords from the eBay search URL (_nkw param), or use the SKU."""
@@ -102,68 +143,55 @@ class EbayScraper(BaseScraper):
     def _search_via_api(
         self, product: Product, keywords: str, timestamp: str
     ) -> list[PriceCheck]:
-        """Call the eBay Finding API and return filtered PriceCheck results.
-
-        Returns an empty list on API failure or when no results match filters.
-        """
-        app_id = os.environ.get("EBAY_API_KEY") or os.environ.get("EBAY_APP_ID", "")
-        if not app_id:
+        """Call the eBay Browse API and return filtered PriceCheck results."""
+        token = self._get_oauth_token()
+        if not token:
             logger.warning(
-                "eBay use_api=true but EBAY_API_KEY is not set — falling back to HTML scraping"
+                "eBay use_api=true but EBAY_CLIENT_ID/EBAY_CLIENT_SECRET not set"
+                " — falling back to HTML scraping"
             )
             return []
 
-        params = {
-            "OPERATION-NAME": "findItemsByKeywords",
-            "SERVICE-VERSION": "1.0.0",
-            "SECURITY-APPNAME": app_id,
-            "RESPONSE-DATA-FORMAT": "JSON",
-            "keywords": keywords,
-            "itemFilter(0).name": "ListingType",
-            "itemFilter(0).value": "FixedPrice",
-            "itemFilter(1).name": "Condition",
-            "itemFilter(1).value": "1000",  # New
-            "sortOrder": "PricePlusShippingLowest",
-            "paginationInput.entriesPerPage": "10",
-        }
-
         try:
-            resp = self._session.get(_FINDING_API_URL, params=params, timeout=30)
+            resp = self._session.get(
+                _BROWSE_API_URL,
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
+                    "Accept": "application/json",
+                },
+                params={
+                    "q": keywords,
+                    "filter": "buyingOptions:{FIXED_PRICE},conditions:{NEW|NEW_OTHER}",
+                    "sort": "price",
+                    "limit": "10",
+                },
+                timeout=30,
+            )
             resp.raise_for_status()
             data = resp.json()
         except Exception as exc:
-            logger.warning("eBay Finding API request failed: {exc}", exc=exc)
+            logger.warning("eBay Browse API request failed: {exc}", exc=exc)
             return []
 
-        try:
-            items = (
-                data.get("findItemsByKeywordsResponse", [{}])[0]
-                .get("searchResult", [{}])[0]
-                .get("item", [])
-            )
-        except (IndexError, KeyError):
-            items = []
+        items = data.get("itemSummaries", [])
 
         raw_results: list[dict] = []
         for item in items:
             try:
-                title = item.get("title", [""])[0]
-                price_str = (
-                    item.get("sellingStatus", [{}])[0]
-                    .get("currentPrice", [{}])[0]
-                    .get("__value__", "")
-                )
+                title = item.get("title", "")
+                price_info = item.get("price", {})
+                price_str = price_info.get("value", "")
                 price = float(price_str) if price_str else None
-                url = item.get("viewItemURL", [""])[0]
-                listing_type = (
-                    item.get("listingInfo", [{}])[0].get("listingType", [""])[0].lower()
-                )
-                if "auction" in listing_type:
+                url = item.get("itemWebUrl", "")
+                buying_options = item.get("buyingOptions", [])
+                # Skip pure auctions (no fixed price option)
+                if buying_options and "FIXED_PRICE" not in buying_options:
                     continue
                 raw_results.append(
                     {"title": title, "price": price, "url": url, "in_stock": price is not None}
                 )
-            except (IndexError, KeyError, ValueError):
+            except (KeyError, ValueError):
                 continue
 
         filtered = self.filter_results(raw_results, product)
@@ -237,7 +265,7 @@ class EbayScraper(BaseScraper):
     def search(self, product: Product, search_url: str) -> list[PriceCheck]:
         """Search eBay for *product*.
 
-        Uses the Finding API when ``use_api=true`` and EBAY_API_KEY is set.
+        Uses the Browse API when ``use_api=true`` and credentials are set.
         Falls back to HTML scraping with Buy It Now filter otherwise.
         """
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -245,9 +273,10 @@ class EbayScraper(BaseScraper):
         if getattr(self.config, "use_api", False):
             keywords = self._extract_keywords(search_url, product)
             results = self._search_via_api(product, keywords, timestamp)
-            if results or os.environ.get("EBAY_API_KEY") or os.environ.get("EBAY_APP_ID"):
+            # If credentials are set, trust the API result (even if empty)
+            if os.environ.get("EBAY_CLIENT_ID") and os.environ.get("EBAY_CLIENT_SECRET"):
                 return results
-            # Key was not set — fall through to HTML scraping
+            # No credentials — fall through to HTML scraping
 
         url = _ensure_bin(search_url)
 
