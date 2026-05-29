@@ -6,7 +6,7 @@ This document explains how to configure the n8n workflow that receives price ale
 
 ## Prerequisites
 
-- n8n running and accessible (e.g., `https://n8n.bygianotto.com.br`)
+- n8n running and accessible (e.g., `https://your-n8n-host`)
 - A Telegram bot token (create one via [@BotFather](https://t.me/BotFather))
 - Your Telegram chat ID (see below)
 
