@@ -144,6 +144,22 @@ class NeweggScraper(BaseScraper):
         html = response.text
         soup = BeautifulSoup(html, "lxml")
 
+        # Detect Newegg's "no results" — handles old desktop and new mobile layout
+        no_results_selectors = [
+            ".result-message-error",   # old desktop: "We have found 0 items"
+            ".empty-info",             # new mobile/React: "Sorry, we couldn't find a match"
+        ]
+        for sel in no_results_selectors:
+            el = soup.select_one(sel)
+            if el:
+                text = el.get_text()
+                if "0 items" in text or "couldn't find" in text.lower() or "no result" in text.lower():
+                    logger.info(
+                        "Newegg: no listings for {url} (site reports no results)",
+                        url=search_url,
+                    )
+                    return []
+
         cards: list[Any] = []
         for sel in _CARD_SELECTORS:
             cards = soup.select(sel)

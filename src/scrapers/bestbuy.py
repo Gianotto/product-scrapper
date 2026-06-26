@@ -115,6 +115,29 @@ class BestBuyScraper(BaseScraper):
         html = response.text
         soup = BeautifulSoup(html, "lxml")
 
+        # Detect geo-block / bot-challenge: BestBuy shows country selector or serves
+        # a tiny Akamai challenge page instead of real search results
+        page_title = soup.find("title")
+        title_text = page_title.get_text().lower() if page_title else ""
+        if "international" in title_text or "select your country" in title_text:
+            logger.warning(
+                "BestBuy: geo-blocked (country selector) for {url} — "
+                "non-US IP detected; scraping not possible without a US proxy",
+                url=search_url,
+            )
+            return []
+
+        # If the page is tiny (< 20 KB) and has no recognisable BestBuy structure,
+        # it is likely an Akamai bot-challenge page
+        if len(html) < 20_000 and not soup.find(class_=lambda c: c and "sku" in c):
+            logger.warning(
+                "BestBuy: bot-challenge or incomplete page received for {url} "
+                "(page size={size} bytes) — skipping",
+                url=search_url,
+                size=len(html),
+            )
+            return []
+
         cards: list[Any] = []
         for sel in _CARD_SELECTORS:
             cards = soup.select(sel)
