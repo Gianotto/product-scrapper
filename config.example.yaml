@@ -84,6 +84,40 @@ products:
       newegg: "https://www.newegg.com/p/pl?d=UX3405CA-PZ194W"
       ebay: "https://www.ebay.com/sch/i.html?_nkw=UX3405CA-PZ194W"
 
+  - sku: "UX5406SA-Ultra7"
+    name: "ASUS Zenbook S 14 (UX5406, Core Ultra 7 258V, 32GB, 1TB, 3K OLED Touch)"
+    target_price: 1599.99
+    must_have_terms:
+      - "32GB"
+      - "258V"
+    blocklist_terms:
+      - "Refurbished"
+      - "Renewed"
+      - "16GB"
+    stores:
+      bestbuy: "https://www.bestbuy.com/site/searchpage.jsp?st=6615730"
+      amazon: "https://www.amazon.com/s?k=ASUS+Zenbook+S+14+UX5406+Ultra+7+258V+32GB"
+      asus_shop: "https://shop.asus.com/us/search?q=UX5406+Ultra+7"
+      ebay: "https://www.ebay.com/sch/i.html?_nkw=ASUS+Zenbook+S14+UX5406+Ultra+7+258V&_sop=15"
+      newegg: "https://www.newegg.com/p/pl?d=ASUS+Zenbook+S14+UX5406+Ultra+7+258V"
+
+  - sku: "UX5406SA-Ultra9"
+    name: "ASUS Zenbook S 14 2026 (UX5406, Core Ultra 9 386H, 32GB, 1TB, 3K OLED Touch)"
+    target_price: 1649.99
+    must_have_terms:
+      - "32GB"
+      - "386H"
+    blocklist_terms:
+      - "Refurbished"
+      - "Renewed"
+      - "16GB"
+    stores:
+      amazon: "https://www.amazon.com/s?k=ASUS+Zenbook+S14+UX5406+Ultra+9+386H+32GB"
+      bestbuy: "https://www.bestbuy.com/site/searchpage.jsp?st=Zenbook+S14+Ultra+9+386H"
+      asus_shop: "https://shop.asus.com/us/search?q=UX5406+Ultra+9"
+      ebay: "https://www.ebay.com/sch/i.html?_nkw=ASUS+Zenbook+S14+UX5406+Ultra+9+386H&_sop=15"
+      newegg: "https://www.newegg.com/p/pl?d=ASUS+Zenbook+S14+UX5406+Ultra+9+386H"
+
 # Alert configuration
 alerts:
   webhook_url: "${N8N_WEBHOOK_URL}"  # Read from .env; never hardcode
